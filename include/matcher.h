@@ -12,7 +12,6 @@ struct UserRequest {
 
 extern moodycamel::ConcurrentQueue<UserRequest> request_queue;
 
-// Worker and producer declarations
 void matching_worker(int worker_id);
 void user_generator();
 
