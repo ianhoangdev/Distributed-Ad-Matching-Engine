@@ -78,6 +78,36 @@ Ad* match_simple(const string &interest, const string &region) {
     Ad* best_ad = *max_element(candidates.begin(), candidates.end(), [](Ad* a, Ad* b){
         return a->bid < b->bid;
     });
-    
+
     return best_ad;
+}
+
+int main() {
+    shared_ptr<AdIndex> initial = build_sample_index();
+
+    atomic_store(&current_index, initial);
+    cout << "Published initial AdIndex snapshot.\n";
+
+    string interest = "soccer";
+    string region = "UK";
+    Ad* winner = match_simple(interest, region);
+
+    if (winner) {
+        cout << "Matched Ad id=" << winner->id << " bid=" << winner->bid << " keywords=[";
+        for (size_t i = 0; i < winner->keywords.size(); ++i) {
+            cout << winner->keywords[i] << (i + 1 < winner->keywords.size() ? "," : "");
+        }
+        cout << "] region=" << winner->region << "\n";
+    } else {
+        cout << "No matching ad found.\n";
+    }
+
+    shared_ptr<AdIndex> updated = std::make_shared<AdIndex>();
+    for (unique_ptr<Ad> &up : initial->ads_storage) {
+        updated->ads_storage.push_back(make_unique<Ad>(*up)); // copy Ad manually
+    }
+    updated->build_indexes();
+    cout << "Published updated snapshot (deep copy).\n";
+
+    return 0;
 }
