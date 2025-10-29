@@ -1,9 +1,11 @@
 #include <atomic>
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -17,7 +19,7 @@ struct Ad {
 };
 
 struct AdIndex{
-    vector<unique_ptr<Ad>> ads_storage;
+    vector<shared_ptr<Ad>> ads_storage;
 
     unordered_map<string, vector<Ad*>> keyword_to_ads;
     unordered_map<string, vector<Ad*>> region_to_ads;
@@ -25,8 +27,8 @@ struct AdIndex{
     void build_indexes() {
         keyword_to_ads.clear();
         region_to_ads.clear();
-        for (unique_ptr<Ad> &up : ads_storage) {
-            Ad* a = up.get();
+        for (shared_ptr<Ad> &ad_ptr : ads_storage) {
+            Ad* a = ad_ptr.get();
             for (string &kw : a->keywords) {
                 keyword_to_ads[kw].push_back(a);
             }
@@ -48,11 +50,11 @@ shared_ptr<AdIndex> current_index;
 shared_ptr<AdIndex> build_sample_index() {
     shared_ptr<AdIndex> idx = make_shared<AdIndex>();
     
-    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{1, 1.20, {"sports","fitness"}, "US"}));
-    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{2, 2.50, {"finance","invest"}, "US"}));
-    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{3, 0.75, {"sports","soccer"}, "UK"}));
-    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{4, 3.10, {"fitness","wellness"}, "US"}));
-    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{5, 1.80, {"travel","adventure"}, "UK"}));
+    idx->ads_storage.push_back(std::make_shared<Ad>(Ad{1, 1.20, {"sports","fitness"}, "US"}));
+    idx->ads_storage.push_back(std::make_shared<Ad>(Ad{2, 2.50, {"finance","invest"}, "US"}));
+    idx->ads_storage.push_back(std::make_shared<Ad>(Ad{3, 0.75, {"sports","soccer"}, "UK"}));
+    idx->ads_storage.push_back(std::make_shared<Ad>(Ad{4, 3.10, {"fitness","wellness"}, "US"}));
+    idx->ads_storage.push_back(std::make_shared<Ad>(Ad{5, 1.80, {"travel","adventure"}, "UK"}));
 
     idx->build_indexes();
     return idx;
@@ -82,32 +84,45 @@ Ad* match_simple(const string &interest, const string &region) {
     return best_ad;
 }
 
+void periodic_update() {
+    int counter = 100;
+    while (true) {
+        this_thread::sleep_for(chrono::seconds(5));
+
+        shared_ptr<AdIndex> old_snapshot = atomic_load(&current_index);
+        shared_ptr<AdIndex> new_snapshot = make_shared<AdIndex>(*old_snapshot);
+
+        new_snapshot->ads_storage.push_back(
+            make_shared<Ad>(Ad{counter++, 2.0, {"fitness","health"}, "US"})
+        );
+
+        new_snapshot->build_indexes();
+        atomic_store(&current_index, new_snapshot);
+
+        cout << "Published updated snapshot with new ad id=" << counter-1 << "\n";
+    }
+}
+
 int main() {
     shared_ptr<AdIndex> initial = build_sample_index();
 
     atomic_store(&current_index, initial);
     cout << "Published initial AdIndex snapshot.\n";
 
-    string interest = "soccer";
-    string region = "UK";
-    Ad* winner = match_simple(interest, region);
+    thread updater(periodic_update);
 
-    if (winner) {
-        cout << "Matched Ad id=" << winner->id << " bid=" << winner->bid << " keywords=[";
-        for (size_t i = 0; i < winner->keywords.size(); ++i) {
-            cout << winner->keywords[i] << (i + 1 < winner->keywords.size() ? "," : "");
+    for (int i = 0; i < 5; ++i) {
+        this_thread::sleep_for(std::chrono::seconds(3));
+        string interest = "fitness";
+        string region = "US";
+        Ad* winner = match_simple(interest, region);
+        if (winner) {
+            cout << "Matched Ad id=" << winner->id << " bid=" << winner->bid << "\n";
+        } else {
+            cout << "No matching ad found.\n";
         }
-        cout << "] region=" << winner->region << "\n";
-    } else {
-        cout << "No matching ad found.\n";
     }
 
-    shared_ptr<AdIndex> updated = std::make_shared<AdIndex>();
-    for (unique_ptr<Ad> &up : initial->ads_storage) {
-        updated->ads_storage.push_back(make_unique<Ad>(*up)); // copy Ad manually
-    }
-    updated->build_indexes();
-    cout << "Published updated snapshot (deep copy).\n";
-
+    updater.detach(); // let it run in background
     return 0;
 }
