@@ -27,8 +27,14 @@ int main() {
 
     std::thread producer(user_generator);
 
-    producer.join();
+    const int num_producers = 4;
+    std::vector<std::thread> producers;
+
+    for (int i = 0; i < num_producers; ++i)
+        producers.emplace_back(user_generator);
+
     for (auto &w : workers) w.join();
+    for (auto &p : producers) p.join();
 
     return 0;
 }
