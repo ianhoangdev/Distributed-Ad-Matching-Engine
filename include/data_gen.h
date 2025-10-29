@@ -61,6 +61,7 @@ inline std::string uuid_v4(std::mt19937 &rng) {
 
 inline std::shared_ptr<Ad> generate_random_ad(std::mt19937 &rng, const DataGenerationConfig &cfg = {}) {
     std::uniform_real_distribution<double> bid_dist(cfg.min_bid, cfg.max_bid);
+    std::uniform_real_distribution<double> prob01(0.0, 1.0);
     std::uniform_int_distribution<int> kw_count_dist(cfg.min_keywords_per_ad, cfg.max_keywords_per_ad);
     const auto &iv = interest_vocab();
     const auto &rv = region_vocab();
@@ -70,6 +71,8 @@ inline std::shared_ptr<Ad> generate_random_ad(std::mt19937 &rng, const DataGener
     Ad ad;
     ad.id = uuid_v4(rng);
     ad.bid = bid_dist(rng);
+    ad.ctr = prob01(rng);
+    ad.landing_score = prob01(rng);
     ad.region = rv[reg_pick(rng)];
 
     int k = kw_count_dist(rng);
