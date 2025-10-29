@@ -1,5 +1,6 @@
 #include <atomic>
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -55,4 +56,28 @@ shared_ptr<AdIndex> build_sample_index() {
 
     idx->build_indexes();
     return idx;
+}
+
+Ad* match_simple(const string &interest, const string &region) {
+    shared_ptr<AdIndex> snap = atomic_load(&current_index);
+    if (!snap) return nullptr;
+    
+    vector<Ad*> candidates;
+
+    auto it_kw = snap->keyword_to_ads.find(interest);
+    if (it_kw != snap->keyword_to_ads.end()) {
+        candidates.insert(candidates.end(), it_kw->second.begin(), it_kw->second.end());
+    }
+    auto it_reg = snap->region_to_ads.find(region);
+    if (it_reg != snap->region_to_ads.end()) {
+        candidates.insert(candidates.end(), it_reg->second.begin(), it_reg->second.end());
+    }
+
+    if (candidates.empty()) return nullptr;
+
+    Ad* best_ad = *max_element(candidates.begin(), candidates.end(), [](Ad* a, Ad* b){
+        return a->bid < b->bid;
+    });
+    
+    return best_ad;
 }
