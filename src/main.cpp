@@ -27,10 +27,8 @@ int main() {
 
     std::thread producer(user_generator);
 
-    std::this_thread::sleep_for(std::chrono::seconds(30));
-
-    producer.detach();
-    for (auto &w : workers) w.detach();
+    producer.join();
+    for (auto &w : workers) w.join();
 
     return 0;
 }
