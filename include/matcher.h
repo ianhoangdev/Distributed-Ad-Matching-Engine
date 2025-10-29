@@ -27,17 +27,24 @@ inline Ad* match_simple(const std::string &interest, const std::string &region) 
     if (candidates.empty()) return nullptr;
 
     // QualityScore = f(CTR, Relevance, LandingScore)
-    // Use a simple weighted blend in [0,1]
     const double w_ctr = 0.5;
     const double w_rel = 0.4;
     const double w_land = 0.1;
 
     auto relevance_of = [&](Ad* ad) -> double {
-        // Binary relevance for now: 1 if interest keyword appears, else 0
-        for (const auto &kw : ad->keywords) if (kw == interest) return 1.0;
-        return 0.0;
-    };
+        if (ad->keywords.empty()) {
+            return 0.0;
+        }
 
+        double matches = 0.0;
+        for (const auto &kw : ad->keywords) {
+            if (kw == interest) {
+                matches += 1.0;
+            }
+        }
+
+        return matches / static_cast<double>(ad->keywords.size());
+    };
     Ad* best = nullptr;
     double best_rank = -1.0;
     for (Ad* ad : candidates) {
