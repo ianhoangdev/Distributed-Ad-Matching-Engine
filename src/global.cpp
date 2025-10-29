@@ -4,5 +4,7 @@
 
 // Single definition of the global snapshot pointer
 std::shared_ptr<AdIndex> current_index;
-
+std::atomic<size_t> g_requests_processed{0};
+std::atomic<size_t> g_ads_matched{0};
+std::atomic<size_t> g_no_match_found{0};
 

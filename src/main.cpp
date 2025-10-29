@@ -25,8 +25,6 @@ int main() {
     for (int i = 0; i < num_workers; ++i)
         workers.emplace_back(matching_worker, i);
 
-    std::thread producer(user_generator);
-
     const int num_producers = 4;
     std::vector<std::thread> producers;
 

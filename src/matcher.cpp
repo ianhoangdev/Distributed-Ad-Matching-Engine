@@ -15,10 +15,9 @@ void matching_worker(int worker_id) {
             Ad* winner = match_simple(req.interests, req.region);
 
             if (winner) {
-                std::cout << "[Worker " << worker_id << "] Request " << req.id
-                          << " matched Ad id=" << winner->id << " bid=" << winner->bid << "\n";
+                g_ads_matched.fetch_add(1, std::memory_order_relaxed);
             } else {
-                std::cout << "[Worker " << worker_id << "] Request " << req.id << " no match\n";
+                g_no_match_found.fetch_add(1, std::memory_order_relaxed);
             }
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(1)); // avoid busy loop
