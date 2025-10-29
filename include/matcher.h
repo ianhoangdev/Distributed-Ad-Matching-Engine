@@ -2,6 +2,7 @@
 #include <string>
 #include "ad_index.h"
 #include "global.h"
+#include <algorithm>
 #include "../third_party/ConcurrentQueue.h"
 #include <unordered_set>
 
@@ -13,7 +14,7 @@ struct UserRequest {
 
 extern moodycamel::ConcurrentQueue<UserRequest> request_queue;
 
-void matching_worker(int worker_id);
+void matching_worker();
 void user_generator();
 
 inline Ad* match_simple(const std::vector<std::string> &interests, const std::string &region) {

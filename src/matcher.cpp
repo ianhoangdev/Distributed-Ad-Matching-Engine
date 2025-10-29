@@ -13,7 +13,7 @@ void matching_worker() {
     while (true) {
         if (request_queue.try_dequeue(req)) {
             Ad* winner = match_simple(req.interests, req.region);
-
+            g_requests_processed.fetch_add(1, std::memory_order_relaxed);
             if (winner) {
                 g_ads_matched.fetch_add(1, std::memory_order_relaxed);
             } else {
