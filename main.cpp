@@ -41,3 +41,18 @@ struct AdIndex{
         }
     }
 };
+
+shared_ptr<AdIndex> current_index;
+
+shared_ptr<AdIndex> build_sample_index() {
+    shared_ptr<AdIndex> idx = make_shared<AdIndex>();
+    
+    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{1, 1.20, {"sports","fitness"}, "US"}));
+    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{2, 2.50, {"finance","invest"}, "US"}));
+    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{3, 0.75, {"sports","soccer"}, "UK"}));
+    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{4, 3.10, {"fitness","wellness"}, "US"}));
+    idx->ads_storage.push_back(std::make_unique<Ad>(Ad{5, 1.80, {"travel","adventure"}, "UK"}));
+
+    idx->build_indexes();
+    return idx;
+}
