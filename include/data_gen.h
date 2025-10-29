@@ -3,6 +3,7 @@
 #include <string>
 #include <random>
 #include <memory>
+#include <sstream>
 #include "ad.h"
 #include "ad_index.h"
 
@@ -31,7 +32,34 @@ inline const std::vector<std::string>& region_vocab() {
     return regions;
 }
 
-inline std::shared_ptr<Ad> generate_random_ad(int id, std::mt19937 &rng, const DataGenerationConfig &cfg = {}) {
+inline std::string uuid_v4(std::mt19937 &rng) {
+    std::uniform_int_distribution<uint32_t> dist32(0, 0xFFFFFFFFu);
+    uint32_t d0 = dist32(rng);
+    uint32_t d1 = dist32(rng);
+    uint32_t d2 = dist32(rng);
+    uint32_t d3 = dist32(rng);
+
+    // Set version (4) and variant (10)
+    d1 = (d1 & 0xFFFF0FFFu) | 0x00004000u; // version 4 in time_hi_and_version
+    d2 = (d2 & 0x3FFFFFFFu) | 0x80000000u; // variant 10 in clock_seq_hi_and_reserved
+
+    std::ostringstream oss;
+    oss.setf(std::ios::hex, std::ios::basefield);
+    oss.fill('0');
+    oss.width(8); oss << (d0);
+    oss << "-";
+    oss.width(4); oss << ((d1 >> 16) & 0xFFFFu);
+    oss << "-";
+    oss.width(4); oss << (d1 & 0xFFFFu);
+    oss << "-";
+    oss.width(4); oss << ((d2 >> 16) & 0xFFFFu);
+    oss << "-";
+    oss.width(4); oss << (d2 & 0xFFFFu);
+    oss.width(8); oss << (d3);
+    return oss.str();
+}
+
+inline std::shared_ptr<Ad> generate_random_ad(std::mt19937 &rng, const DataGenerationConfig &cfg = {}) {
     std::uniform_real_distribution<double> bid_dist(cfg.min_bid, cfg.max_bid);
     std::uniform_int_distribution<int> kw_count_dist(cfg.min_keywords_per_ad, cfg.max_keywords_per_ad);
     const auto &iv = interest_vocab();
@@ -40,7 +68,7 @@ inline std::shared_ptr<Ad> generate_random_ad(int id, std::mt19937 &rng, const D
     std::uniform_int_distribution<size_t> reg_pick(0, rv.size() - 1);
 
     Ad ad;
-    ad.id = id;
+    ad.id = uuid_v4(rng);
     ad.bid = bid_dist(rng);
     ad.region = rv[reg_pick(rng)];
 
@@ -58,10 +86,8 @@ inline std::shared_ptr<AdIndex> build_sample_index(const DataGenerationConfig &c
     std::mt19937 rng(cfg.seed);
     idx->ads_storage.reserve(cfg.num_ads);
     for (size_t i = 0; i < cfg.num_ads; ++i) {
-        idx->ads_storage.push_back(generate_random_ad(static_cast<int>(i + 1), rng, cfg));
+        idx->ads_storage.push_back(generate_random_ad(rng, cfg));
     }
     idx->build_indexes();
     return idx;
 }
-
-

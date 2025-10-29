@@ -3,7 +3,7 @@
 #include <vector>
 
 struct Ad {
-    int id;
+    std::string id;
     double bid;
     std::vector<std::string> keywords;
     std::string region;

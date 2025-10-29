@@ -1,4 +1,5 @@
 #include "../include/matcher.h"
+#include "../include/data_gen.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -27,8 +28,8 @@ void matching_worker(int worker_id) {
 
 void user_generator() {
     int request_id = 0;
-    std::vector<std::string> interests = {"fitness","sports","travel"};
-    std::vector<std::string> regions = {"US","UK"};
+    const auto &interests = interest_vocab();
+    const auto &regions = region_vocab();
 
     // Deterministic RNG for reproducible workloads
     static std::mt19937 rng(123456);
