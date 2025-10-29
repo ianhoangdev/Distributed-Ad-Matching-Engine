@@ -7,7 +7,7 @@
 
 moodycamel::ConcurrentQueue<UserRequest> request_queue;
 
-void matching_worker(int worker_id) {
+void matching_worker() {
     UserRequest req;
 
     while (true) {

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -Iinclude -Ithird_party
+CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -Iinclude -Ithird_party -pthread
 TARGET = ad_matching_engine
 SRCDIR = src
 SOURCES = $(SRCDIR)/main.cpp $(SRCDIR)/matcher.cpp $(SRCDIR)/global.cpp
@@ -13,4 +13,3 @@ clean:
 	rm -f $(TARGET)
 
 .PHONY: all clean
-
