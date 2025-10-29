@@ -12,7 +12,7 @@ void matching_worker(int worker_id) {
 
     while (true) {
         if (request_queue.try_dequeue(req)) {
-            Ad* winner = match_simple(req.interest, req.region);
+            Ad* winner = match_simple(req.interests, req.region);
 
             if (winner) {
                 std::cout << "[Worker " << worker_id << "] Request " << req.id
@@ -31,18 +31,25 @@ void user_generator() {
     const auto &interests = interest_vocab();
     const auto &regions = region_vocab();
 
-    // Deterministic RNG for reproducible workloads
     static std::mt19937 rng(123456);
     std::uniform_int_distribution<size_t> dist_interest(0, interests.size() - 1);
     std::uniform_int_distribution<size_t> dist_region(0, regions.size() - 1);
+    std::uniform_int_distribution<int> dist_num_interests(1, 3);
 
     while (true) {
         UserRequest req;
         req.id = request_id++;
-        req.interest = interests[dist_interest(rng)];
         req.region = regions[dist_region(rng)];
-        request_queue.enqueue(req);
 
+        int num_interests = dist_num_interests(rng);
+        std::unordered_set<std::string> unique_interests;
+        while (unique_interests.size() < static_cast<size_t>(num_interests)) {
+            unique_interests.insert(interests[dist_interest(rng)]);
+        }
+        
+        req.interests.assign(unique_interests.begin(), unique_interests.end());
+        
+        request_queue.enqueue(req);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
