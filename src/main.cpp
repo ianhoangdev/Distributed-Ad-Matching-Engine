@@ -14,6 +14,12 @@ extern moodycamel::ConcurrentQueue<UserRequest> request_queue;
 
 static DataGenerationConfig kDefaultGenCfg{10000, 12345u, 1, 3, 0.5, 5.0};
 
+const std::string RESET  = "\033[0m";
+const std::string RED    = "\033[31m";
+const std::string GREEN  = "\033[32m";
+const std::string YELLOW = "\033[33m";
+const std::string CYAN   = "\033[36m";
+const std::string MAGENTA= "\033[35m";
 
 struct comma_numpunct : std::numpunct<char> {
 protected:
@@ -41,15 +47,19 @@ void metrics_printer() {
         // Clear screen
         std::cout << "\033[2J\033[H";
         std::cout << "\n";
-        std::cout << "==================== METRICS ====================\n";
-        std::cout << std::setw(25) << std::left << "QPS (approx):"       << reqs_per_sec << "\n";
-        std::cout << std::setw(25) << std::left << "Avg Latency (us):"  << avg_lat_us << "\n";
-        std::cout << std::setw(25) << std::left << "Queue Size:"         << q_size << "\n";
-        std::cout << std::setw(25) << std::left << "Total Ads:"          << total_ads << "\n";
-        std::cout << std::setw(25) << std::left << "Total Requests:"     << current_reqs << "\n";
-        std::cout << std::setw(25) << std::left << "Total Matched:"      << g_ads_matched.load(std::memory_order_relaxed) << "\n";
-        std::cout << std::setw(25) << std::left << "Total No Match:"     << g_no_match_found.load(std::memory_order_relaxed) << "\n";
-        std::cout << "=================================================\n";
+        std::cout << CYAN << "==================== METRICS ====================\n" << RESET;
+
+        // Print metrics
+        std::cout << std::setw(25) << std::left << "QPS (approx):"       << GREEN << reqs_per_sec << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Avg Latency (us):"  << YELLOW << std::fixed << std::setprecision(2) << avg_lat_us << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Queue Size:"         << MAGENTA << q_size << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Total Ads:"          << CYAN << total_ads << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Total Requests:"     << GREEN << current_reqs << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Total Matched:"      << GREEN << g_ads_matched.load(std::memory_order_relaxed) << RESET << "\n";
+        std::cout << std::setw(25) << std::left << "Total No Match:"     << RED << g_no_match_found.load(std::memory_order_relaxed) << RESET << "\n";
+
+        // Footer
+        std::cout << CYAN << "=================================================\n" << RESET;
     }
 }
 
