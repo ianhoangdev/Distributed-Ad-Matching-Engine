@@ -13,7 +13,7 @@ extern std::shared_ptr<AdIndex> current_index;
 
 class AdUpdater {
 public:
-    AdUpdater(int /*start_id*/ = 100, int update_interval_sec = 5)
+    AdUpdater(int /*start_id*/ = 100, int update_interval_sec = 3)
         : interval(update_interval_sec) {}
 
     void start() {

@@ -12,6 +12,11 @@ void matching_worker() {
 
     while (true) {
         if (request_queue.try_dequeue(req)) {
+            auto end_time = std::chrono::high_resolution_clock::now();
+            auto duration = end_time - req.start_time;
+            auto us = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+            g_total_latency_us.fetch_add(us, std::memory_order_relaxed);
+
             Ad* winner = match_simple(req.interests, req.region);
             g_requests_processed.fetch_add(1, std::memory_order_relaxed);
             if (winner) {
@@ -39,6 +44,7 @@ void user_generator() {
         UserRequest req;
         req.id = request_id++;
         req.region = regions[dist_region(rng)];
+        req.start_time = std::chrono::high_resolution_clock::now();
 
         int num_interests = dist_num_interests(rng);
         std::unordered_set<std::string> unique_interests;

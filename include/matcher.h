@@ -2,6 +2,7 @@
 #include <string>
 #include "ad_index.h"
 #include "global.h"
+#include <chrono>
 #include <algorithm>
 #include "../third_party/ConcurrentQueue.h"
 #include <unordered_set>
@@ -10,6 +11,7 @@ struct UserRequest {
     int id;
     std::vector<std::string> interests;
     std::string region;
+    std::chrono::high_resolution_clock::time_point start_time;
 };
 
 extern moodycamel::ConcurrentQueue<UserRequest> request_queue;
