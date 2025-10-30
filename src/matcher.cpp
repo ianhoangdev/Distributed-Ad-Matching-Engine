@@ -55,5 +55,7 @@ void user_generator() {
         req.interests.assign(unique_interests.begin(), unique_interests.end());
         
         request_queue.enqueue(req);
+
+        std::this_thread::sleep_for(std::chrono::microseconds(200));
     }
 }
