@@ -31,4 +31,14 @@ The system's performance hinges on its RCU-style (Read-Copy-Update) concurrency 
 
 This pattern guarantees that readers are never blocked and always operate on a 100% consistent version of the index.
 
----
+
+## How to Build and Run
+```bash
+# Build the project
+make
+# Run the project
+./ad_matching_engine
+```
+The application will start, build the initial index, and begin printing metrics to the console:
+<img width="589" height="152" alt="Screenshot 2025-10-29 at 11 20 02 PM" src="https://github.com/user-attachments/assets/1693b700-1ee9-4fb2-af75-74993e6bd82c" />
+
