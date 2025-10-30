@@ -38,6 +38,6 @@ make
 # Run the project
 ./ad_matching_engine
 ```
-The application will start, build the initial index, and begin printing metrics to the console:
-<img width="589" height="152" alt="Screenshot 2025-10-29 at 11 20 02 PM" src="https://github.com/user-attachments/assets/1693b700-1ee9-4fb2-af75-74993e6bd82c" />
+The application will start, build the initial index, and begin printing metrics to the console every 2s:
+<img width="624" height="155" alt="Screenshot 2025-10-30 at 1 46 19 AM" src="https://github.com/user-attachments/assets/7f5a9467-ce7c-439c-9e75-56bde533b5a4" />
 
