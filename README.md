@@ -10,10 +10,9 @@ The core of the project is the concurrency model: matching threads (readers) ope
 * **AdRank Logic:** Implements a non-trivial matching algorithm similar to Google's that finds candidate ads by region and interest, then scores them using a weighted AdRank formula: `rank = bid * quality`, where `quality = f(ctr, relevance, landing_score)`.
 
 ## Core Architecture: The Atomic Snapshot
-
-The system's performance hinges on its RCU-style (Read-Copy-Update) concurrency model, managed by a single global:
-
-`std::atomic<std::shared_ptr<AdIndex>> current_index;`
+**High Level Design**:
+![high_level_design](https://github.com/user-attachments/assets/b5ed2590-0341-4ede-bde6-8ca569790ea3)
+The system uses RCU-style (Read-Copy-Update) concurrency model, managed by a single global: `std::atomic<std::shared_ptr<AdIndex>> current_index;`
 
 **Readers (Matching Workers):**
 1.  A worker thread fetches its own `shared_ptr` to the current index:
